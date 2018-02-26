@@ -1,0 +1,120 @@
+\documentclass{article}[11pt]
+\usepackage{Geoff}
+
+\begin{document}
+
+\title{Notes for future Graph Match paper} \author{Geoffrey Iyer}
+\maketitle
+
+NOTE TO SELF: Look up quadratic matching problems.
+NOTE TO SELF 2: Apparently some cool stuff could be done with brain-graphs.
+The vogelstein 2015 paper says that there's been a lot of failure in this area
+due to size of data problems. So maybe we can be the new cool kids on the block.
+NOTE TO SELF 3: Need to check out the QAP benchmarks
+
+So the idea here is that I'm going to present the graph matching algorithm as an advancement purely on the computational side. Between hierarchical and Nystrom we go really fast. But first we have to go through the current state of the art. That's what this file of notes is for. And assuming that I'm correct and we are the fastest, this can be turned into a related work section for the final paper.
+
+\section{Results from my code}
+
+Just the timing: I ran graph match on sets of size $100\cdot2^i$ for $i = 1,\ldots,10$. For each size I did 5 trials and took the average time (there was still a lot of variance so I probably have to do more trials). I didn't think very hard about setting the cluster size for the hierarchical part, that could probably be optimized. Here are the results.
+
+\textbf{Many-to-many matching} \\
+\begin{tabular}{c|c|c|c|}
+  i & size & avg Time & ratio \\
+  \hline
+  1 &    200 &  0.0495 &  N/A   \\ 
+  2 &    400 &  0.0375 & 0.7582 \\
+  3 &    800 &  0.0601 & 1.6043 \\
+  4 &   1600 &  0.1205 & 2.0034 \\
+  5 &   3200 &  0.3294 & 2.7334 \\
+  6 &   6400 &  0.8166 & 2.4794 \\
+  7 &  12800 &  2.0106 & 2.4620 \\
+  8 &  25600 &  4.9548 & 2.4643 \\
+  9 &  51200 & 16.1501 & 3.2595 \\
+  10 & 102400 & 55.8308 & 3.4570 \\
+\end{tabular}
+
+\textbf{One-to-one matching} \\
+\begin{tabular}{c|c|c|c|}
+  i & size & avg Time & ratio \\
+  \hline
+  1 &    200 &  0.1135 &  N/A   \\ 
+  2 &    400 &  0.1776 & 1.5657 \\
+  3 &    800 &  0.4549 & 2.5608 \\
+  4 &   1600 &  1.3227 & 2.9078 \\
+  5 &   3200 &  3.5639 & 2.6943 \\
+  6 &   6400 & 12.2408 & 3.4346 \\
+  7 &  12800 & 24.4615 & 1.9984 \\
+  8 &  25600 & 86.9463 & 3.5544 \\
+\end{tabular}
+
+So in both situations it looks like we're beating $n^2$. The best algorithm I found so far in papers is $n^3$, so in terms of speed we're pretty cool. Of course we still have to worry about accuracy.
+
+\section{2010-Present}
+
+\subsection{Vogelstein Fast Approximate Quadratic Programming \cite{Vogelstein2015}}
+
+2015, Seems pretty relevant
+
+He's doing the problem for data of size $10^6$. Seems pretty relevant...
+I didn't fully understand the algorithm but I saw Hungarian in there and I'm worried that he's going too slow. He definitely has big-$O(n^3)$. It says so in the paper. But he claims the leading constant is sufficiently small to handle the thingy.
+
+In the experimental section he says he does 1000 nodes in 300 seconds (approx). So this code is in a completely different category. The good news for him is that he gets really good accuracy.
+
+QAPLIB is a library is 137 quadratic assignment problems, but they are all small. Like 250 vertices. Not what we are focused on.
+
+Erdos-Renyi is an algorithm for generating random graphs. Could be good for accuracy tests?
+
+\subsection{Fiori Robust Multimodal \cite{NIPS2013_4925}}
+
+2013, SEMI-RELEVANT
+
+Minimizing a similar energy but not the same. The most important takeaway is that they match at most graphs of size 500. So totally not on the same level. I think I can leave this be.
+
+\subsection{Zaslavskiy Many-to-many \cite{Zaslavskiy2010}}
+
+2010, semi-relevant
+
+Deals with many-to-many graph matching by doing two different one-to-many matches. Energy is pretty straightforward. Minimize by line search along gradient. Still uses hungarian algorithm as part of finding the direction to line search. I didn't fully understand this little bit but whatever. Doing a hungarian on matrix size (Number of nodes)
+
+Once again they are quite slow.
+    
+\section{2000-2009}
+
+\subsection{Caelli and Kosinov \cite{Caelli2004}}
+
+2004, haven't read it yet. Haven't even downloaded it. They do many-to-many though I think.
+
+\subsection{Kosinov Eigenspace and Clustering \cite{Kosinov2002}}
+
+2002, NOT-RELEVANT
+
+A similar idea of going to eigenspace and matching graphs there. Includes the bit about aligning eigenvectors. Doesn't talk about size of graphs.
+
+\subsection{Knossow Inexact \cite{Knossow2009}}
+
+2009, RELEVANT
+
+The most related of related stuff. I very much use their ideas. But they max out at like 5,000 or 7,000 nodes so that's interesting.
+
+They are more unsupervised than me though which is nice for them.
+
+\subsection{Zaslavskiy PATH \cite{4641936}}
+
+2009,
+
+In terms of speed this is not even close. Roughly 10 sec for 100 nodes.
+
+\section{Not state of the art but related}
+
+\subsection{Hoffman Variation of Spectrum \cite{Hoffman1953}}
+
+This is a foundational paper of the graph matching idea. It relates the norm minimization problem to eigenvalues and permutations.
+
+\subsection{Umeyama \cite{Umeyama1988}}
+
+You've already read this a million times. First paper with the good idea. Does some silly stuff for eigenvector alignment but background theory is good.
+
+\bibliographystyle{unsrt} \bibliography{../../BibTex/research}
+
+\end{document}

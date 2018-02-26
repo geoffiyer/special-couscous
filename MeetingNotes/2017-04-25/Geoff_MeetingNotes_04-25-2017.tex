@@ -1,0 +1,34 @@
+\documentclass[12pt]{article}
+\usepackage{Geoff}
+
+\begin{document}
+
+\section*{Weighted Graph Matching Problem (Umeyama 1988)}
+Given $G,H$ two undirected weighted graphs, each with $n$ nodes. Say that $V_G$, $V_H$ are the nodes of the respective graphs, and $W_G,W_H$ are the (symmetric) weight matrices). Want to create a bijection $V_G \leftrightarrow V_H$ that respects the weights. Can think of a bijection as a permutation on $n$ letters. Represent it with a permutation matrix $P$. Then we define the energy of the matching as
+\[J(P) = \norm{PW_GP^T-W_H}^2.\]
+We try to minimize $J(P)$. In a perfect match, the weights would equal exactly and we would get $J(P)=0$.
+
+I think this problem is $NP-$complete. If not, it is at least unfeasible. So we introduced a relaxed version. Instead of minimizing $J(P)$ with $P$ a permutation matrix, we minimize $J(Q)$ with $Q$ and orthogonal matrix.
+
+I'll skip the linear algebra background and just state the answer. Let
+\[W_G = U_G\Lambda_GU_G^T\] \[W_H = U_H\Lambda_HU_H^T\]
+the eigendecompostions of the weight matrices. Then the matrices $Q$ which minimize $J(Q)$ satisfy the formula
+\begin{align}
+  Q = U_HSU_G^T
+\end{align}
+where $S$ is a diagonal matrix with any arrangements of $+1,-1$ on the diagonal.
+
+This $S$ is actually a problem. In the case where $G,H$ are isomorphic, there exists an $S$ such that $Q$ is a permutation matrix, but not every $S$ will work. We can't try all $2^n$ different choices for $S$, so we make one further approximation. In the case where we have a graph isomorphism given by $P$, and we choose the correct $S$, we have the following fact:
+\begin{align}
+  \tr(P^TU_HSU_G^T) &= \tr(P^TP) \\
+  &= n,
+\end{align}
+and any other choice of $P,S$ will result in a trace that is $\leq n$.
+Let $\bar{U}_G,\bar{U}_H$ be the matrices containing the absolute values of the elements in $U_G,U_H$. We get our approximate solution to the problem by choosing $P$ a permutation that maximizes
+\[\tr(P^T\bar{U}_H\bar{U}_G^T)\]
+
+This last problem is tractable. The Hungarian Algorithm solves it exactly, and the runtime here is $O(n^3)$. See the page 4 of the Umeyama (1988) paper for a nice example.
+
+\section*{Inexact Matching (Knossow 2010)}
+Choose $K < \min(\abs{G},\abs{H})$. Instead of $U_G,U_H$ as above, restrict to the $K$ eigenvectors of the Graph Laplacian corresponding to the smallest (nonzero) eigenvalues. Not exactly sure what happens here. I didn't finish going through this yet. 
+\end{document}

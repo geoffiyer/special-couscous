@@ -1,0 +1,33 @@
+\input{stylefile.tex}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{Meeting Notes 12-6-2016: Optical-Lidar Classification}
+\author{Geoffrey Iyer}
+\maketitle
+
+The purpose of this file is to show some of our early classification results on the Optical/Lidar datasets. A quick recap: we use eigenvectors of the Graph-Laplacian to get an approximate solution to the graph min-cut problem. Let $X = \{x_1,x_2,\ldots,x_n\}$ represent te first dataset, and $Y = \{y_1,y_2,\ldots,y_n\}$ represent the second. We assume that the points are co-registered, i.e. that $x_j$ corresponds to $y_j$ in some natural physical way (in our examples, these are the same pixels captured with different cameras). Then define the graph $G$ with $n$ vertices (representing our $n$ data points) and edge weights defined by
+\[w_{ij} = \max\left(\norm{x_i - x_j}_X , \norm{y_i-y_j}_Y\right).\]
+Here we assume that $\norm{\cdot}_X$ and $\norm{\cdot}_Y$ are scaled such that they are comparable.
+
+After defining the graph, we construct the Graph Laplacian and find eigenvectors (using the Nystrom Extension to keep computation time reasonable), then apply kmeans to the eigenvectors to get the final classifcation shown below.
+
+Instead of using the maximum (i.e. the $L^\infty$ norm) I've also tried using an $L^p$ norm for many different values of $p$. There is rarely much of a difference in the end result.
+
+\begin{figure}
+  \includegraphics[width = \textwidth]{Umbrella.jpg}
+  \caption{Classification on Umbrella Dataset}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width = \textwidth]{House(DFC2015).jpg}
+  \caption{Classification on Houses Dataset (DFC2015)}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width = \textwidth]{Stadium(DFC2013).jpg}
+  \caption{Classification on Stadium Dataset (DFC2013)}
+\end{figure}
+
+\end{document}

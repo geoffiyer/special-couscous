@@ -1,0 +1,9 @@
+Final Product:
+
+We have developed a method for the processing and segmentation of multimodal images (multiple images of the same scene obtained from different sources). Using multiple images gives us a larger set of data, which in turn allows for better classification results. But care must be taken to properly correlate the redundancies between images, as well as emphasize the unique information in each image. Our algorithm uses graph-based methods to fuse and extract features from the dataset, then implements standard data-classification methods on these features.
+
+
+
+Some Extra Sentences that are hanging around:
+
+We aim to create a general algorithm for processing datasets that contain information from more than one modality. Where existing algorithms can identify the redundant information that is captured in each modality, we try to also emphasize the unique information that 

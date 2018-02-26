@@ -1,0 +1,12 @@
+MediumBook: Seems bad.
+	First step is allocating the N_1 x N_2 cost matrix and filling it out.
+	Then you make a lot of copies of this matrix.
+	So seems totally unusable for my problem.
+
+Feng: It's all about what to do when you have repeated eigenvalues.
+	But I think that we don't care at all for our project.
+
+OLMOS: When they say inexact graph matching they're talking about labels.
+	So this isn't useful at all. We want inexact in terms of the
+	nodes/edges business (i.e. not a bijection)
+	

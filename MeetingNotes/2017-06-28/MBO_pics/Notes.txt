@@ -1,0 +1,30 @@
+
+Here are some choices for parameters for MBO code
+
+Gloria's norm, Umbrella:
+n = whatever
+dt = 0.1
+lambda = 0.1
+sigma = 0.01
+
+
+
+Gloria's norm, DFC:  had to try 3-4 times to get it to work
+n = whatever
+dt = 1
+lambda = 0.1
+sigma = 0.01
+
+
+
+My norm, umbrella:
+n = whatever
+dt = 0.1
+lambda = either 0 or really small
+	  1e-10 worked okay but 1e-9 did not
+sigma = 1
+(also need to add dim1 and dim2)
+
+
+Synthetic 4class:
+./bin/b.exe 4 0.1 0 1 data/test.tiff 3 1

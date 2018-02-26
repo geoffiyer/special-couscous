@@ -1,0 +1,76 @@
+% ctrl-c ctrl-q ctrl-e
+\documentclass[12pt]{article}
+\usepackage{Geoff,cite}
+
+\title{MBO Details}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\section{Nystrom}
+\cite{Fowlkes04, Merkurjev13, Woodworth13} Let $X$ be the set of graph nodes,
+and $W$ the weight matrix. Let $A\subseteq X$ such that $\abs{A} \ll \abs{X}$,
+and let $B = X\backslash A$. Then up to a rearrangement of nodes, we can write
+\begin{align}
+  W = \begin{pmatrix} W_{AA} & W_{AB} \\ W_{BA} & W_{BB}
+  \end{pmatrix},
+\end{align}
+where the matrix $W_{AB} = W_{BA}^T$ consists of weights between nodes in $A$
+and nodes in $B$, $W_{AA}$ consists of weights between pairs of nodes in $A$,
+and $W_{BB}$ consists of weights between pairs of nodes in $B$. Nystr\"{o}m's
+extension approximates $W$ as
+\begin{align}
+  W \approx \begin{pmatrix} W_{AA} \\ W_{BA} \end{pmatrix}
+  W_{AA}^{-1} \begin{pmatrix} W_{AA} & W_{AB}\end{pmatrix}.
+\end{align}
+In particular, this approximates
+\[W_{BB} \approx W_{BA}W_{AA}^{-1}W_{AB}.\]
+
+A few words on the error of approximation. Suppose $W$ is symmetric positive semidefinite (as it is in our example), then we can write $W = V^TV$ for some matrix $V$. It turns out that the Nystrom extension approximates the unknown part of $V$ (corresponding to $W_{BB}$ by projecting it orthogonally onto the known part (corresponing to $W_{AB}$). This explained much more in \cite{Fowlkes04}.
+
+Here we use the normalized graph Laplacian
+\[L = I - D^{-1/2}WD^{-1/2},\]
+where $D$ is the degree matrix. So to solve the eigenproblem on $L$, we solve it on the normalized version of $W$, which we calculate as follows.
+\begin{align}
+  d_X = \begin{bmatrix}W_{AA} & W_{AB}\end{bmatrix}
+  \begin{bmatrix}1 \\ \vdots \\ 1 \end{bmatrix} \\
+  d_Y = \begin{bmatrix}W_{BA} & W_{BA}W_{AA}^{-1}W_{AB}\end{bmatrix}
+  \begin{bmatrix}1 \\ \vdots \\ 1 \end{bmatrix}
+\end{align}
+Then define the normalized weights
+\begin{align}
+  \hat{W}_{AA} = W_{AA} ./ \left(\sqrt{d_X}\sqrt{d_X}^T\right),\\
+  \hat{W}_{AB} = W_{AB} ./ \left(\sqrt{d_X}\sqrt{d_Y}^T\right),
+\end{align}
+where $./$ signifies componentwise division.
+
+This is when I usually leave off. It turns out this is enough to calculate the eigenvectors of the approximate $\hat{W}$. Very exciting. In particular, we compute and store matrices of size at most $\abs{A}\times\abs{X}$ the entire time.
+
+\section{MBO algorithm}
+\cite{Meng17,Hu2015,Merkurjev13}
+Notation: let $N = \abs{X}$, $m = $ number of classes. We'll keep track of our classification via an $N\times m$ \emph{assigment matrix} $u$. Entry $(i,j)$ of $u$ stores the probability that element $x_i \in X$ belongs in class $j$. The final output matrix will contain exactly one $1$ in each row (the rest are zero), but in the intermediate steps it can be anything that sums to one. Also, we like to label the $i$-th row of $u$ as $u_i$ for notational convenience.
+
+Here we are minimizing the energy
+\begin{align}
+  E(u) = \epsilon \iprod{u,L_s u} + \frac{1}{\epsilon}\sum_i W(u_i) + \sum_i \frac{\mu}{2}\lambda(x_i)\norm{u_i - \hat{u}_i}^2_{L_2}.
+\end{align}
+The first term gives the graph-cut energy. The second term is the multiwell potential
+\begin{align}
+  W(u_i) = \prod_{k=1}^{m}\frac{1}{4}\norm{u_i - e_k}_{L_1}^2.
+\end{align}
+I actually don't know why they use this exact potential. The main idea is clear though. The term encourages each $u_i$ to be close to one of the simplex vertices $e_k$, i.e. close to completely classified. The last term is the fidelity. $\mu$ is an input parameter (generally as big as you can while maintaining stability), $\lambda$ is 1 or 0 depending on if that $x_i$ is supervised or not.
+
+If we were to minimize by gradient descent, our update would be given by
+\begin{align}
+  \frac{\pd u}{\pd t} = -\epsilon L_s u - \frac{1}{\ep}W^{'}(u) - \mu\lambda(x)(u-\hat{u})
+\end{align}
+Instead we propose to minimize this via an MBO algorithm. Specifically, diffuse then threshold until we reach some stopping point. The diffuse step is given by
+\begin{align}
+  \frac{u^{n+\frac{1}{2}}-u^n}{dt} = -L_s u^n - \mu \lambda(x) (u^n - \hat{u}).
+\end{align}
+Then for thresholding you just let $u_i = e_r$ where $r$ is the index of the biggest value in $u_i$. I.e. you threshold one number of $u_i$ up to $1$ and the rest to $0$.
+
+The important thing here is that we can use the eigenvectors of $L_s$ (calculated earlier) to quickly do the diffuse step. Just change coords, so that the $L_s u^n$ step instead because multiplication by a diagonal matrix.
+\bibliographystyle{unsrt} \bibliography{../BibTex/research}
+
+\end{document}

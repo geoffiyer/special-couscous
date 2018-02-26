@@ -1,0 +1,7 @@
+Final Product:
+
+We aim to create a general algorithm for processing datasets that contain information from more than one modality (ex: in medical science, a patient may receive a large variety of tests, resulting in many groups of data that all describe the same subject). Where existing algorithms such as canonical corelation or parellel factor analysis can identify the redundant information that is captured in each modality, we try to also emphasize the unique information that each set brings. In other words, we expect a multimodal dataset to be more valuable than the sum of its parts, and we aim to create an algorithm that can identify and make use of this value. In the research completed in the US, we accomplish this goal in the specific case of multimodal images with co-registered pixels. However, there is significant work to be done in removing the registration assumption. An ideal final product would be robust enough to give reasonable results for any input sets.
+
+
+
+Drafting Zone:

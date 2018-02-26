@@ -1,0 +1,1 @@
+umbmbo 6 0.1 0.1 1 1 gives an error of 80292.1

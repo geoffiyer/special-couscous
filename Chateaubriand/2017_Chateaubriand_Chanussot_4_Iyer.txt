@@ -1,0 +1,28 @@
+Re : supporting letter for the application of M. Geoffrey IYER to a Chateaubriand grant
+
+Dear Madam, dear Sir,
+
+With this letter, I would like to provide my strongest support to the application of M. Geoffrey IYER to a Chateaubriand grant for a 9 month stay in my group at GIPSA-Lab, Grenoble Institute of Technology, France.
+
+As for my own credentials, I have been a Full Professor of signal and image processing at the Grenoble Institute of Technology since 2007. I am a member of the Institut Universitaire de France (2012-2017). I have served as the chairman of the IEEE Geoscience and Remote Sensing Society Data Fusion Technical Committee, a member of the IEEE Signal Processing Society Machine Learning for Signal Processing Technical Committee. I have authored or co-authored more than 400 professional articles in image processing and related fields, and I have also published 2 books and 10 book chapters. I have been the Editor-in-Chief of the IEEE Journal of Selected Topics in Applied Earth Observation and Remote Sensing (J-STARS, 2011-2015), and I am on the editorial board of some top international journals, including IEEE Transactions on Geoscience and Remote Sensing, Pattern Recognition, IEEE Journal of Selected Topics in Signal Processing, and Journal of Signal Processing Systems. I have received several outstanding expert awards. I am co-supervising the doctoral work of M. Iyer with Professor Andrea Bertozzi.
+
+I take this opportunity to provide some additional information about the international recognition of the Grenoble Institute of Technology (Grenoble INP), simply referring to a few rankings :
+- Grenoble INP was ranked number 2 in the top 100 French engineering school (Usine Nouvelle, 2014)
+- Grenoble INP was ranked 1st in France for innovation and research (Industrie et technologies, 2014)
+- Grenoble INP was ranked number 3 in France for engineering schools (U.S. News & World report on education, 2014)
+
+The work of Geoffrey Iyer is focused on the analysis, processing and interpretation of multimodal data, keeping in mind of explicitly taking into account the specific nature of the data, and trying to design a generic framework. During the first months of his PhD, he has proposed an innovative method based on graphs and applied to multimodal remote sensing (with the assumption that the data are co-registered). The aim of his stay in France will be to get rid of this limitation and provide an even more generic formal framework. To complete this ambitious step, the idea is to consider the observed object of interest in its intrinsic geometry of information and learn the corresponding manifold from the different modalities (this step will require manifold alignment with the only assumption that the different modalities actually do share some common information, in addition to their respective specificities). Then, the approximated manifold will be completed by the complementary information provided by each modality separately in order to achieve a complete reconstruction. 
+
+
+
+The two involved teams (the Department of Mathematics at UCLA and GIPSA-Lab at the Grenoble Institute of Technology) have complementary skills : Professor Bertozzi in UCLA has the expertise in graph based approaches and optimization techniques, while I am myself working with data fusion, remote sensing and high dimensional spaces. Also, while in Grenoble, M. Iyer will work with Professor Jutten. An IEEE  and EURASIP Fellow, Prof. Jutten is an internationally recognized expert in statistical signal processing, source separation and multimodal data processing. His current activities involve geometrical modeling of information in multimodality and perfectly fit the scope of our project.
+
+Finally, I would like to stress the outstanding abilities of M. Iyer. He graduated in pure mathematics from the University of Michigan. This scientific background is of the utmost importance for the project we want to accomplish. Over the past few months, I had the opportunity to greatly appreciate his many qualities, his critical and creative thinking and his deep motivation. He is a team player, while being also totally autonomous. He is a very promising and scientifically very mature young researcher.
+
+As a conclusion, I think Geoffrey Iyer is the perfect candidate for this joint project and I hope that he will be able to join my group with the support of the Chateaubriand program.
+
+If you have any question, please feel free to contact me, 
+
+Yours truly,
+Prof. Dr. Eng. Jocelyn Chanussot
+IEEE Fellow

@@ -1,0 +1,115 @@
+\message{ !name(Research_Statement.tex)}\documentclass{article}[11pt]
+\usepackage{Geoff,graphicx,subcaption}
+
+\title{\vspace{-3cm}TODO\vspace{-0.3cm}}
+\author{Geoffrey Iyer} \date{}
+\begin{document}
+
+\message{ !name(Research_Statement.tex) !offset(-3) }
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+With the increasing availability of data we often come upon multiple
+datasets, derived from different sensors, that describe the same object or
+phenomenon. We call the sensors \emph{modalities}, and because each
+modality represents some new degrees of freedom, it is generally desirable
+to use more modalities rather than fewer. For example, in the area of
+speech recognition, researchers have found that integrating the audio data
+with a video of the speaker results in a much more accurate classification
+\cite{Potamianos03, sedighin:hal-01400542}. Similarly, in medicine, the
+authors of \cite{Lei12} and \cite{Samadi2016} fuse the results of two
+different types of brain imaging to create a final image with better
+resolution than either of the originals. However, correctly processing a multimodal dataset is not a simple task \cite{lahat:hal-01062366}. The main difficulty in multimodaly lies in finding a way to coordinate information that is represented in different formats. In the current state-of-the-art, most multimodal algorithms apply only to one specific problem. 
+
+Now start talking about representations as manifolds and geometry or topology stuff. This is a very abstract way to view the data and is certainly portable to many different problems. You have plenty of stuff to cite here too.
+
+Now get into graph matching. Not sure how much to put here and how much to put in the method section. I guess we'll decide as we move along.
+
+\section{The Method}
+\label{sec:method}
+
+\subsection{The basic problem}
+Let $X = \{x_1,x_2,\ldots,x_N\}$, $Y = \{y_1,\ldots,y_N\}$ be undirected, weighted graphs, with corresponding weight matrices $W_X,W_Y$. For convenience of notation, we will assume $\abs{A} = \abs{Y}$. Later we will show how to extend to the general case. Our goal is to find a bijection $\rho: X\to Y$ that preserves the edge weights. 
+
+We will show how to extend in a bit. We want to find bijection \[p: \{1,2,\ldots,N\} \to \{1,2,\ldots,N\}\] that preserves the weights as best as possible. But it's easier to represent with a matrix. $P$ will be $N\times N$ and will have exactly one $1$ in each column (and a lot of zeros). We want to minimize
+\[\norm{PW_1P^T - W_2}^2_F.\]
+Exact solution is too expensive. Can solve using Graph Laplacian trick from \cite{Umeyama1988,Knossow2009}.
+
+\subsection{Some stuff about the graph laplacian probably}
+Relax problem to
+\[Q^* = \text{argmin}_{QQ^T=I}\norm{QW_1Q^T - W_2}^2_F.\]
+Using orthogonal instead of permutation makes this solvable by standard linear algebra. Here's the answer. Let $L_1,L_2$ the Graph Laplcians corresponding to $W_1,W_2$ (TODO: Actually define this reasonably). $U_1,U_2$ the corresponding matrices of eigenvectors. Then $Q^* = U_1SU_2^T$. $S$ is a diagonal matrix with entries of $\pm 1$ to account for sign ambiguity in eigenvectors.
+
+This $S$ is actually a pain, because it represents $2^N$ possibilities. Right now we're supervising this away by assuming we know one point worth of correspondence. There are some ideas on how to fix it unsupervised in \cite{Knossow2009}.
+
+Recall from Graph Laplacian
+\begin{align*}
+  \text{columns of }U_i &\iff \text{ features} \\
+  \text{rows of }U_i &\iff \text{ data points}.
+\end{align*}
+Match rows of $U_1$ to rows of $U_2$ by considering $U_1U_2^T$. \\~\\
+
+$Q^*_{ij}$ gives the similarity between node $i$ of $G_1$ and node $j$ of $G_2$. \\~\\
+Choose a permutation $p: \{1,2,\ldots,N\} \to \{1,2,\ldots,N\}$ via
+\[\text{argmax}_{\text{permutations }p}\sum_{i=1}^N Q^*_{i,p(i)}.\]
+Hungarian algorithm finds this in $O(N^3)$.
+
+Benefits of Graph Matching
+\begin{enumerate}
+\item A precise number representing similarity between nodes gives us many options.
+  \begin{itemize}
+  \item Thresholding
+  \item Many-to-many matching
+  \item Hierarchical matching
+  \end{itemize}
+\item Easy extension to the case $\abs{G_1}\neq\abs{G_2}$.
+\item Robust to many continuous deformations.
+  \begin{itemize}
+  \item scaling, shifts, rotations, etc.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Coarsifying}
+
+NEED TO WRITE THIS ENTIRE THING
+
+\subsection{Nystrom}
+
+I can copy paste almost all of this from the other thing
+
+\section{Experiment}
+\label{sec:experiment}
+
+Say we have $N=6$ and calculated:
+\[Q^* = \begin{pmatrix}
+    -0.1629 &  -0.1711 &  -0.1703 &   0.3426 &   0.3717 &  -0.2100\\
+    -0.1647 &  -0.1662 &  -0.1677 &   0.2966 &   0.3192 &  -0.1172\\
+    -0.1660 &  -0.1653 &  -0.1657 &  -0.1477 &  -0.1861 &   0.8308\\
+    -0.4579 &   0.6860 &   0.2665 &  -0.1787 &  -0.1480 &  -0.1678\\
+    0.4939 &  -0.1039 &   0.1196 &  -0.6689 &   0.3080 &  -0.1486\\
+    0.4577 &  -0.0795 &   0.1176 &   0.3561 &  -0.6647 &  -0.1872\\
+  \end{pmatrix}\]
+Then \[P^* = \begin{pmatrix}
+    0&0&0&1&0&0\\
+    0&0&0&0&1&0\\
+    0&0&0&0&0&1\\
+    0&1&0&0&0&0\\
+    1&0&0&0&0&0\\
+    0&0&1&0&0&0\\
+  \end{pmatrix}
+\]
+
+I also have a LOT of pictures I can copy-paste into this section. The couple of straight-up matches. Then the change detection work.
+
+\section{Future Work}
+\label{sec:futurework}
+
+Oh boy, lots of stuff. Runtime fixes are interesting to me. Then there's all the decisions to make! We have this method that does something (although it's hard to see what). I can think of a bunch of things to do with it.
+
+\bibliographystyle{unsrt} \bibliography{../../BibTex/research}
+
+\end{document}
+\message{ !name(Research_Statement.tex) !offset(-115) }

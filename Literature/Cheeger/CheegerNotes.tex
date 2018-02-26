@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{Geoff}
+
+\newcommand{\F}[0]{\textbf{F}}
+\newcommand{\grad}[0]{\nabla}
+\newcommand{\dive}[0]{\text{div}}
+
+\begin{document}
+
+\section{Multivariable Calc}
+
+Okay, so multivariable calc has always been a weak point for me. That means I'm going to have to write some nice notes for this bit.
+
+\subsection{Divergence}
+
+First of all, what is divergence? The first description is for vector fields in
+$\R^3$.  Given $\F$ a continuously differentiable vector field in $\R^3$, we
+have a function
+\[\dive\F : \R^3 \to \R\]
+$\dive\F(p)$ measures how much "stuff" is coming out of
+the point $p$. Specifically, you can get it via flow.
+\[\dive\F(p) = \lim_{V \to \{p\}} \int\int_{S(V)} \frac{\F\cdot \textbf{n}}{\abs{V}}dS.\]
+
+Okay. So here $V$ is a volume containing $p$ that shrinks to
+exactly $p$. So a source will have positive divergence, and a sink will have
+negative.
+
+The much more common version: write $\F = U\textbf{i} + V\textbf{j} + W\textbf{k}$.
+\[\dive\F = \grad\cdot\F = \frac{\partial U}{\partial x} + \frac{\partial V}{\partial y} + \frac{\partial W}{\partial z}.\]
+
+But of course, there's the similar thing for $\R^n$.
+
+\subsection{Laplacian from Divergence}
+
+This is actually kind of neat. So if $f: \R^n \to \R$ is a function, then
+$\grad f$ is a vector field.  We then define the laplacian as $\dive \grad f$. So
+we get that
+\[\Delta f = \grad \cdot \grad f.\]
+
+Here's my heuristic. $f(p)$ keeps track of amount of stuff at point $p$.
+$\grad f$ tells us if we get more stuff or less stuff by moving in some
+direction starting from $p$. I still don't get what $\Delta f$ really means, but
+I've been looking at it for a while and I think I have to move on. I do at least
+have some things to say about it.  Think of back in harmonic functions, where we
+were so interested in $\Delta u = 0$. This gives the function the mean value
+property, which we always thought was so cool. Now think about the
+discretization of the 2D laplacian, with the 4 on the diagonal and the -1's on
+the banded parts.
+\[\text{DiscreteLaplacian}\cdot\text{vector} = 0\]
+means that my vector has this discrete average property.
+
+\section{Total Variation Norm}
+
+Here's the situation. We're working in graph land. $\mathcal{V}$ is $\R^{\text{num vertices}}$. $\mathcal{E}$ is $\R^{\text{num edges}}$. We're defining the norm we're going to minimize over. They call it the TV norm but it looks like $L^1$? I should check again to see if I understand.
+\begin{align}
+  TV_w(u) &= \max\left\{\iprod{\dive_w\phi, u}\;:\;\phi \in \mathcal{E}, \norm{\phi}_{\infty} \leq 1\right\} \\
+          & = \frac{1}{2}\sum_{x,y} w(x,y)\abs{u(x) - u(y)}.
+\end{align}
+
+\section{Ratio Cut}
+
+Recall Ratio cut is
+\[\min_{S\subseteq V}cut(S,S^c)^2\left(\frac{1}{\abs{S}} + \frac{1}{\abs{S^c}}\right).\]
+Note that if $\chi_S$ is an indicator function for $S$, then we have
+\[TV_w(\chi_S) = \text{cut}\left(S,S^c\right).\]
+So then the square root of the ratio cut is the same as
+\[\min_{u:\; u(x)\in\{0,1\}}\frac{TV_w(u)}{\norm{u - mean(u)}_{L^2}}.\]
+Theorem from the paper: Even when we allow $u$ to be arbitrary real-valued, the exact answer to the problem is still a binary partition. This is pretty cool. It means that we can relax to $u: \mathcal{V} \to \R$ without changing final results.
+
+From here, we claim that the ginsburg landau thing approximates $TV$, and we go on to minimize
+\[\min_u \frac{GL_\ep(u)}{\norm{u - mean(u)}_{L^2}}.\]
+
+
+\end{document}

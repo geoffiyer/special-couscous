@@ -1,0 +1,5 @@
+Try:
+n = 4
+dt = 0.1
+lambda = 0.1  <--- doesn't do anything in unsupervised
+sigma = 0.01  <--- I'm surprised it's this small

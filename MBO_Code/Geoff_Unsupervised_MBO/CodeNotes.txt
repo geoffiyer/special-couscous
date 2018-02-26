@@ -1,0 +1,47 @@
+main.cpp:
+
+Input Args:
+n = num classes,
+dt = dt,
+lambda = fidelity term,
+sigma = graphWeightTerm,
+input_img_string = what it sounds like
+
+Other:
+M = 100   (not sure what this represents though)
+m = number of nystrom points (default to 100)
+windowsSize = 2  (unused for dimension > 3)
+
+width = image width
+height = image height
+d = num of dimensions (gloria uses this for hyperspectral)
+input_image = my image, stored as 1d array.
+              Not sure how it's ordered yet but we'll see.
+feature_vec = { input_image if dimension > 3
+                something complicated if dimension <= 3
+              }
+
+N = number of pixels
+V = N x m   nystrom weight thing
+
+N_obj doesn't actually store anything. It's just has the functions inside it.
+
+final_index = the array of final classification results.
+              size N+2
+              elements 0, 1 are rows, cols (respectively)
+              The rest of the N gives the class for each pixel.
+
+
+Load input_image using the iio code. I really hope that I don't have to understand what this does.
+
+Apply Nystrom algorithm to figure out V and D (and doesn't change anything else).TODO: What are V and D again? I think V is eigenvectors and D is eigenvalues but we'll have to see... TODO: The code normalizes the input_image values, but only AFTER Nystrom is done. This is pretty weird. Pretty sure I should change this.
+     For my version, I calculate two distance matrices (using the Nystrom idea of comparing important nodes against all nodes to get N x m distance matrix), then combine at this step.
+
+I don't know any of the details about Mumford_Shah yet. I think I figure out the Nystrom stuff first.
+
+
+Nystrom.cpp:
+
+myvector's job is to pick our important nodes (randomly)
+
+TODO: In Gloria's code she does the exp in the same loop that she does the distances. This is what I need to change. Gotta first compute distances, second normalize, third do the exp.

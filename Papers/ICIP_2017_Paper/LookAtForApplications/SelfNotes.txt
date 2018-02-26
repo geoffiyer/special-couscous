@@ -1,0 +1,13 @@
+Possible references:
+
+Applications, Brain Tumors: http://braintumorsegmentation.org/.
+
+Active contour: https://www.ncbi.nlm.nih.gov/pubmed/18196801
+
+Neural Network: http://www.sciencedirect.com/science/article/pii/S0031320397000897
+
+SEEMS IMPORTANT - Graph Cuts: http://ieeexplore.ieee.org/abstract/document/4711858/
+
+Didn't see their method, but they used optical and lidar so that seems worth looking at: http://papers.sae.org/2014-01-0164/
+
+Edge Detection and Morphology: https://www.researchgate.net/publication/267060364_Multimodal_Image_Segmentation_of_Cellular_Fragmentation_Using_Edge_Detector_and_Morphological_Operators

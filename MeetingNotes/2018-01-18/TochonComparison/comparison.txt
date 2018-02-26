@@ -1,0 +1,5 @@
+numRegions in specClust = 75
+numRegions in BPT       = 991
+numRegions in braid     = 162
+
+

@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+\usepackage{Geoff}
+
+\newcommand{\ga}[0]{\alpha}
+\newcommand{\gb}[0]{\beta}
+
+\title{Notes for graph-matching theory}
+
+\begin{document}
+\maketitle
+
+\section{Problem Setup}
+
+Given two weighted graphs $G_1,G_2$ with $\abs{G_1} = \abs{G_2} = N$ and weight
+matrices $W_1,W_2$, our goal is to find a graph isomorphism $\rho: G_1\to G_2$
+that preserves the edge weights as much as possible. An isomorphism of graphs
+can be thought of as a permutation of indices $1,2,\ldots,N$. Let $P$ be the matrix corresponding to this permutation. Then, in detail, our goal is to find
+\begin{align}
+  \text{argmin}_{P \text{ a permutation}}\norm{W_1 - PW_2P^T}_F^2.
+\end{align}
+This problem is NP-hard, so instead we solved the relaxed problem
+\begin{align}
+  \text{argmin}_{Q \text{ orthogonal}}\norm{W_1 - QW_2Q^T}_F^2.
+\end{align}
+This problem has a closed-form solution using eigendecompositions of the weight matrices. The background theory is presented below.
+
+\section{Graph Matching Theorem}
+The proof structure below was adapted from \cite{Umeyama1988,Hoffman1953}
+\begin{theorem}
+  Let $A,B \in \R^{n\times n}$ symmetric, positive definite, with eigendecompositions $A = UA_0U^T, B = VB_0V^T$. Then
+  \begin{align}
+    \text{argmin}_{Q\text{ orthogonal}}\norm{A - QBQ^T}_F^2 = UV^T,
+  \end{align}
+\end{theorem}
+
+\section{Background}
+\begin{theorem}\label{throwawaylabel}
+  Let $A,B \in \R^{n\times n}$ symmetric matrices with eigenvalues $\ga_1\geq \ga_2\geq \cdots \geq \ga_n$ and $\gb_1 \geq \gb_2 \geq \cdots \geq \gb_n$, respectively. Then
+  \begin{align}
+    \norm{A-B}^2_F \geq \sum_{i=1}^n \abs{\ga_i - \gb_i}^2.
+  \end{align}
+\end{theorem}
+\begin{lemma}
+  Let $A_0,B_0\in\R^{n\times n}$ be diagonal matrices, and let
+  \begin{align}
+    Q = \text{argmin}_{VV^T=I}\norm{A_0 - VB_0V^T}^2_f.
+  \end{align}
+  Then $Q$ is a permutation matrix.
+\end{lemma}
+\begin{proof}
+  First, we convert the problem into a trace minimization, as
+  \begin{align}
+    \norm{A_0 - VB_0V^T}^2_F &= \tr\left((A_0 - VB_0V^T)(A_0^T -VB_0^TV^T)\right).\\
+                             &= \tr\left(A_0A_0^T + B_0B_0^T - A_0VB_0^TV^T - VB_0V^TA_0^T \right).\\
+                             &= \tr\left(A_0A_0^T + B_0B_0^T\right) + \tr\left(-A_0VB_0^TV^T - VB_0V^TA_0^T \right).
+  \end{align}
+  Define
+  \begin{align}
+    r(V) &= \tr\left(-A_0VB_0^TV^T - VB_0V^TA_0^T \right). \\
+    &= \sum_{i,j} -2\ga_i\gb_jV_{ij}^2
+  \end{align}
+  Then we have that
+  \begin{align}
+    Q = \text{argmin}_{VV^T=I} r(V).
+  \end{align}
+  Here is where the problem becomes more complicated. Let $W$ be the entry-wise square of $V$
+  \begin{align}
+    W_{ij} = V_{ij}^2.
+  \end{align}
+  Then $W$ is a \emph{doubly-stochastic matrix}. That is,
+  \begin{align}
+    \sum_{i=1}^n W_{ij} = 1 & &\sum_{j=1}^n W_{ij} = 1& & W_{ij}\geq 0
+  \end{align}
+  for all $i,j$. Let $\mathcal{X}$ be the set of doubly-stochastic matrices, and
+  \begin{align}
+    \mathcal{W} = \{ W \in \R^{n\times n} \;:\; W\text{ is the elementwise square of a unitary } V\}.
+  \end{align}
+  Then we have that $\mathcal{W}\subseteq\mathcal{X}$. The Birkhoff-von Neumann theorem \cite{Birkhoff1946} states that $\mathcal{X}$ is a closed convex polyhedron in $\R^{n^2}$, where the vertices are exactly the permutation matrices. If we reimagine $r(V)$ as a function of $W$, then it is a linear form. Furthermore, the set of minimizers of a linear form over closed bounded convex set always includes a vertex. Therefore there is a permutation matrix $Q$ such that
+  \begin{align}
+    Q = \text{argmin}_{W\in \mathcal{X}}r(W).
+  \end{align}
+  Since each permutation matrix is also in $\mathcal{W}$, and $\mathcal{W}\subseteq \mathcal{X}$ we have that
+  \begin{align}
+    Q = \text{argmin}_{VV^T=I}r(V).
+  \end{align}
+  This is exactly what we were trying to prove.
+\end{proof}
+
+With the lemma proved, the theorem then becomes relatively simple. Here is the proof:
+\begin{proof}
+  Let $A_0, B_0$ be the diagonal matrices of eigenvalues corresponding to $A,B$, with
+  \begin{align}
+    A &= UA_0U^{T} \\
+    B &= UVB_0V^{T}U^T.
+  \end{align}
+  Then we have that $\norm{A-B}^2_F = \norm{A_0 - VB_0V^T}^2_F$. Let
+  \begin{align}
+    P = \text{argmin}_{VV^T=I}\norm{A_0 - VB_0V^T}^2_F.
+  \end{align}
+  Then the above lemma gives that $P$ is a permutation matrix. Therefore we have that
+  \begin{align}
+    \norm{A-B}\geq\norm{A_0 - PB_0P^T}^2_F = \sum_{i=1}^n \left( \ga_i - \gb_{p(i)}\right)^2,
+  \end{align}
+  where $p$ is the permutation on indices corresponding to the matrix $P$.
+
+  To finish the proof, we show that $P$ can be chosen to be the identity permutation. Recall that we initially ordered $\ga_1\geq\ga_2\geq\cdots\geq\ga_n$, $\gb_1\geq\gb_2\geq\cdots\geq\gb_n$. Suppose that $p(i) \neq i$ for some $i$. For ease of notation we will say $p(1) = 2$, and $p(3) = 1$. Define the updated permutation $\tilde{p}$ by $\tilde{p}(1) = 1$ and $\tilde{p}(3) = 2$ (and $p(j) = \tilde{p}(j)$ for all other $j$). We will show that
+  \begin{align}
+    \sum_{i=1}^n \left( \ga_i - \gb_{p(i)}\right)^2 \geq \sum_{i=1}^n \left( \ga_i - \gb_{\tilde{p}(i)}\right)^2.
+  \end{align}
+  Most terms in the above inequality cancel. We need only show
+  \begin{align}
+    (\ga_1 -\gb_2)^2 + (\ga_3 -\gb_1)^2 \geq (\ga_1 -\gb_1)^2 + (\ga_3 -\gb_2)^2.
+  \end{align}
+  This last inequality comes from simple algebra. We know that
+  \begin{align}
+    (\ga_1 -\ga_3)(\gb_1 -\gb_2) \geq 0,
+  \end{align}
+  and this came be rearranged to get the desired result. This means that if the original $P$ is not the identity permutation, we can iteratively update it by applying transpositions to get the identity. So we have proved that
+  \begin{align}
+    \norm{A-B}\geq \sum_{i=1}^n \left( \ga_i - \gb_i\right)^2.
+  \end{align}
+\end{proof}
+
+\section{Proof of Graph Matching Theorem}
+\begin{proof}
+  To put this in the context of the previous work, note that
+  \begin{align}
+    \norm{A - QBQ^T}_F^2 = \norm{A_0 - U^TQVB_0V^TQ^TU}.
+  \end{align}
+  In the proof of theorem \ref{throwawaylabel}, it was shown that this equation is minimized by choosing $Q = UV^T$.
+\end{proof}
+\bibliographystyle{unsrt} \bibliography{../../BibTex/research}
+
+\end{document}

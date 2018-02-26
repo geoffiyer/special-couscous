@@ -1,0 +1,19 @@
+\documentclass[12pt]{article}
+\usepackage{Geoff}
+
+\begin{document}
+
+\section*{Brief description of match quality}
+
+We start with datasets
+\begin{align*}
+  X &= \left\{x_1, x_2,\ldots, x_n\right\} \\
+  Y &= \left\{y_1, y_2,\ldots, y_n\right\}, \\
+\end{align*}
+both of size $n\times 3$, coregistered. $X$ represents the after-flood image, and $Y$ represents the before-flood. We match these sets using our graph algorithm. Let's represent this matching as
+\[x_i \text{ matches to } y_{\phi(i)}.\]
+There is also the trivial matching via coregistration, where $x_i$ matches to $y_i$. Following your advice on Thursday, I decided to calculate match quality via
+\[\norm{x_i - x_{\phi(i)}}.\]
+Here a large number represents a bad match, and a small number represents a good match. The graph in the picture shows all of the different match qualities, sorted so that it's easier to view.
+
+\end{document}
