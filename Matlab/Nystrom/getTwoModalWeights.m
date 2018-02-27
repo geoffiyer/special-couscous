@@ -20,7 +20,7 @@ if(nargin < 3)
     p = inf;
 end
 if(nargin < 4)
-    m = min(101,size(X1,1));
+    m = 101;
 end
 if(nargin < 5)
     normType = 'L2';
@@ -33,6 +33,8 @@ if(nargin <  6)
     % choose landmark points straight random
     dex = randperm(size(X1,1));
 end
+
+m = min(m, size(X1,1));
 
 center1 = X1(dex(1:m),:);
 center2 = X2(dex(1:m),:);

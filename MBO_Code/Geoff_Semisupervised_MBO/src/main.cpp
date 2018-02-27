@@ -36,8 +36,8 @@ int main(int argc, char * argv[]){
     // Parameters to adjust are all here
     int dim1 = 3;          // dim of first modality
     int dim2 = 1;          // dim of second modality
-    double dt = 0.0001;       // MBO algorithm step size
-    double mu = 5e5;       // fidelity parameter
+    double dt = 1.0e3;       // MBO algorithm step size
+    double mu = 1.0e-10;       // fidelity parameter
     bool twoNorm = 1;      // Norm is either 2norm or cos angle thing
                            // corresponds to true and false, resp
     bool nystrom = 0;      // True means do the nystrom. False means load from file
@@ -77,7 +77,6 @@ int main(int argc, char * argv[]){
     // string input_evec_string("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Input/Jadeplant_matlab/");
     // string input_evec_string_angle("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Input/Jadeplant_angleNonlocal/");
 
-    mu = mu*100.0;
     /////////////////////////////////////////////////////////////
     
     /////////////////////////////////////////////////////////////////
@@ -97,7 +96,7 @@ int main(int argc, char * argv[]){
     /////////////////////////////////////////////////////////////////
     
     double iterNum= 500;
-    int s=3;
+    int s=3;  // number of diffusions steps before each thresholding.
     int windowSize = 2;
 
     if(nystrom)
@@ -213,8 +212,8 @@ int main(int argc, char * argv[]){
     for (int i=0; i<width_f*height_f*d_f; i++) {
         outImage << fidelity_full[i] << "\n";
         if (fidelity_full[i] != 0) {
-            fidelity_vec.push_back(i+1);
-            fidelity_vec.push_back(fidelity_full[i] -1);
+            fidelity_vec.push_back(i);
+            fidelity_vec.push_back(fidelity_full[i]-1);
         }
     }
     // assert(width_f == width && height_f == height);
@@ -226,6 +225,25 @@ int main(int argc, char * argv[]){
     
     int rows_fidelity = fidelity_vec.size()/2;
     double * fidelity = &fidelity_vec[0];
+
+    ////////////////
+    //  I was nervous about initializing fidelity like above, because if fidelity_vec
+    //  dies we have a hanging pointer. Then I realized this will never happen.
+    //  They go out of scope at the same time. I think.....
+    //  Anyways, the code below is less scary to me, but makes a copy.
+    ////////////////
+    // double * fidelity = new double [fidelity_vec.size()];
+    // for(int i=0; i < rows_fidelity*2; ++i) {
+    //     fidelity[i] = fidelity_vec[i];
+    // }
+    ////////////////
+
+    ////// If you want to print the fidelity read to console /////////////
+    // cout << "rows_fidelity: " << rows_fidelity << "\n";
+    // for(int i=0; i<fidelity_vec.size(); ++i) {
+    //     cout << fidelity_vec[i] << "\n";
+    // }
+    ///////////////////////////////////////////////////////
     
     /////////////Nystrom///////////////
     double * V_test = new double [N*m];

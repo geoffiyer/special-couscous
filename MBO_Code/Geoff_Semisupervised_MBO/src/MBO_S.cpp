@@ -16,7 +16,7 @@
 #include <cblas.h>
 using namespace std;
 
-#define PRINT_MBO
+// #define PRINT_MBO
 
 MBO_S::MBO_S(){};
 MBO_S::~MBO_S(){};
@@ -48,14 +48,12 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
            semisupervised part.
        N: number of points
        n: Number of classes
-       rows_fidelity: number of fidelity points???
-       M: I donno
-       s: I donno
+       rows_fidelity: number of fidelity points
+       M: Number of eigenvectors
+       s: Number of diffusions between each threshold
        dt: stepsize
-       C: same as mu from main.cpp. I'm mostly sure this is the same
-          as the fidelity term constant.
-       iterNum: max number of iterations I think
-       index_sum: number of pixels per class. Updated throughout loop
+       C: same as mu from main.cpp. The fidelity term constant
+       iterNum: max number of iterations
     */
 
 #ifdef PRINT_MBO
@@ -64,17 +62,15 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
     if(mout.fail()) {
         cout << "MBO output failed to open\n";
     }
-    int index_sum[n];
 #endif
 
     // initialization
     // For each row of u0, we randomly select one component to be 1 and others
     // to be 0. For the rows corresponding to fidelity points, we assign the
-    //component corresponding to the known labels to be 1 and others 0.
+    // component corresponding to the known labels to be 1 and others 0.
     for(int i = 0; i<N*n; i++){
         u0[i] = 0;
-    }
-    for(int i = 0; i<N; i++)
+    }    for(int i = 0; i<N; i++)
     {
         int randint = rand()%n;
         int x = i*n+randint;
@@ -113,19 +109,19 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
     int len_a = M*n;
     
     // allocating memory
-    double * a = new double [M*n];
-    double * Denom = new double[M];
-    double * d = new double[M*n];
-    double * u = new double[N*n];
-    double * y0 = new double [N*n];
-    double * X = new double[N*n];
-    double * u_old = new double[N*n];
-    double * u_diff = new double[N*n];
+    double* a = new double[M*n];
+    double* Denom = new double[M];
+    double* d = new double[M*n];
+    double* u = new double[N*n];
+    double* y0 = new double [N*n];
+    double* X = new double[N*n];
+    double* u_old = new double[N*n];
+    double* u_diff = new double[N*n];
     
-    // in explicit formula, a_k^{n+1} = (1-dt*lambda_k)a_k^n-dt*d_k^n,
-    // Denom[i] = 1-dt*lambda_k
+    // in implicit formula, a_k^{n+1} = 1/(1+dt*lambda_k+dt*C)*a_k^n-dt*d_k^n,
+    // Denom[i] = 1/(1+dt*lambda_k+dt*C)
     for(int i =0; i<M; i++){
-        Denom[i] = 1.0-D[i]*dt/s;
+        Denom[i] = 1.0/(1.0+D[i]*dt/s+C*dt/s);
     }
     
     // initialize the coefficients C*lambda(x)*(u-\hat{u}) = d*V
@@ -138,22 +134,39 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
     // u_old = u0
     cblas_dcopy(len_u,u0,incOne,u_old,incOne);
     
+#ifdef PRINT_MBO
+    // mout << "C: " << C << "\n";
+    // mout << "s: " << s << "\n";
+    // mout << "len_u: " << len_u << "\n";
+    // mout << "len_a: " << len_a << "\n";
+    mout << "The Denom:\n";
+    for(int i=0; i<M; ++i)
+        mout << Denom[i] << "\n";
+    // mout << "\nHere's the starting u:\n";
+    // for(int i=0; i<N; ++i) {
+    //     for(int j=0; j<n; ++j)
+    //         mout << u[j+i*n] << " ";
+    //     mout << "\n";
+    // }
+    mout << endl;
+#endif
+
     ///////////iteration  ////////////////////
     for(int iter=0; iter<iterNum;iter++){
         // a is the coefficient of u projected on the eigenvectors V,
-        //u = V*a, so a = V^T*u
+        // u = V*a, so a = V^T*u
         cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                     M, n, N, alpha, V, M, u, n, beta, a, n);
         // step 1: diffuse
         // we do step1 (diffuse) s times before step 2 (thresholding)
         for(int j = 0; j<s;j++){
-            // a = a*Denom-(dt/s)*d
+            // a = Denom*(a-(dt/s)*d)
+            cblas_daxpy(len_a,theta,d,incOne,a,incOne );
             for(int i = 0; i<M; i++){
                 for(int j = 0; j<n;j++){
                     a[i*n+j]=a[i*n+j]*Denom[i];
                 }
             }
-            cblas_daxpy(len_a,theta,d,incOne,a,incOne );
             
             // u = V*a;
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
@@ -162,31 +175,46 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
             // thresholding
             cblas_dcopy(len_u,u,incOne,y0,incOne);
             
-            //u = u-u0;(y0 = y0-u0)
+            //y0 = u-u0
             cblas_daxpy(len_u,gamma,u0,incOne,y0,incOne );
-            
-            // X = lambda(x)(u-u0}), lambda(x) = 1 if this pixel has
+
+            // In the end, X = u-lambda(x)*(u-u0). lambda(x) = 1 if this pixel has
             // known label, and 0 otherwise
+            // Part 1: Start with X = 0
             for(int i = 0; i<N*n; i++){
                 X[i]=0;
             }
+            // Part 2: X = - lambda(x)(u-u0})
             for(int i = 0; i<rows_fidelity; i++){
                 for(int j = 0; j<n; j++){
                     int temp = fidelity[i*2]*n+j;
-                    X[temp] = y0[temp];
+                    X[temp] = -y0[temp];
                 }
             }
-            // d is the coefficient of C*lambda(x)*(u-u0) projected onto V,
-            //X = V*d, so d = C*V^T*X
-            // d = V^T*X
+            // Part 3: X_final = u + X
+            cblas_daxpy(len_u,alpha,u,incOne,X,incOne);
+            
+            // d is the coefficient of C*(u-lambda(x)*(u-u0)) projected onto V,
+            // C*X = V*d, so d = C*V^T*X
+            // Part 1: d = V^T*X
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        M, n, N, alpha, V, M, X, n, beta, d, n);
-            // d = d*C;
+                M, n, N, alpha, V, M, X, n, beta, d, n);
+            // Part 2: d = d*C;
             for(int i = 0; i<M*n; i++){
                 d[i] = d[i]*C;
             }
         }
-        
+
+#ifdef PRINT_MBO
+        mout << "u before threshold:\n";
+        for(int i=0; i<N; ++i) {
+            for(int j=0; j<n; ++j)
+                mout << u[j+i*n] << " ";
+            mout << "\n";
+        }
+        mout << endl;
+#endif
+
         //step 2: thresholding part
         get_index_test(index, u,N,n);
         
@@ -199,24 +227,6 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
             u[x]= 1;
         }
 
-#ifdef PRINT_MBO
-        int temp;
-        for(int i=0; i<n; ++i) {
-            index_sum[i] = 0;
-        }
-        
-        for(int i=0; i<N; ++i) {
-            temp = round(index[i]);
-            ++index_sum[temp];
-        }
-
-        for(int i=0; i<n; ++i) {
-            mout << index_sum[i] << "\n";
-        }
-        
-        mout << "\n\n";
-#endif
-        
         //// criteria to stop
         // norm1 = ||u||_2^2
         double norm1 = cblas_dnrm2(len_u,u,incOne);
@@ -224,6 +234,17 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
         // u_diff = u
         cblas_dcopy(len_u,u,incOne,u_diff,incOne);
         
+// #ifdef PRINT_MBO
+//         mout << "u after threshold:\n";
+//         for(int i=0; i<N; ++i) {
+//             for(int j=0; j<n; ++j)
+//                 mout << u[j+i*n] << " ";
+//             mout << "\n";
+//         }
+//         mout << "norm is " << norm1 << "\n";
+//         mout << endl;
+// #endif
+
         // u_diff = u_diff-u_old
         cblas_daxpy(len_u,gamma,u_old,incOne,u_diff,incOne );
         
@@ -236,8 +257,9 @@ void MBO_S::MBO_algorithm(double * index, double * V, double * D, double *
         }
         //u_old = u;
         cblas_dcopy(len_u,u,incOne,u_old,incOne);
+
     }
-    
+
     delete [] a;
     delete [] Denom;
     delete [] d;
