@@ -12,6 +12,9 @@ L = [numClasses; size(V,2)];
 dlmwrite('~/Schoolwork/Chanussot/MBO_Code/Input/From_Matlab/nm.txt',L,' ');
 dlmwrite('~/Schoolwork/Chanussot/MBO_Code/Input/From_Matlab/nystrom_V.txt',tempI,' ');
 dlmwrite('~/Schoolwork/Chanussot/MBO_Code/Input/From_Matlab/nystrom_D.txt',D,' ');
+if(max(fidelity(:)) * 255 ~= numClasses)
+    warning('fidelity does not match numClasses. Maybe you forgot to rescale?');
+end
 imwrite(fidelity,'~/Schoolwork/Chanussot/MBO_Code/data/fidelityFromMatlab.tiff');
 
 command = '/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Geoff_Semisupervised_MBO/bin/a.exe';

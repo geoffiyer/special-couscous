@@ -6,7 +6,7 @@ addpath ../MBO_Matlab/
 
 %% The variables
 percentGT = 1.0;
-patch = [101 901 1 601];
+patch = [1 701 1 701];
 
 %% Names of all the files in question
 filedir = '/home/gsiyer/Schoolwork/Chanussot/Matlab/DFC2018_Data/2018_Release_Phase1/';
@@ -72,11 +72,10 @@ GT(rand(size(GT)) > percentGT) = 0;
 
 %% Try to MBO it LET'S GOOOOO
 numClasses = max(GT(:));
-fidelity = rescaleIm(GT);
+fidelity = GT/255;
 [K, info] = MBO(V, D, numClasses,fidelity);
 
 K = K+1;
-K = matchClasses(K,GT);
 
 subplot(1,2,1)
 imshow(K/numClasses*64,jet)

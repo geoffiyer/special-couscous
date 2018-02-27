@@ -213,7 +213,7 @@ int main(int argc, char * argv[]){
     for (int i=0; i<width_f*height_f*d_f; i++) {
         outImage << fidelity_full[i] << "\n";
         if (fidelity_full[i] != 0) {
-            fidelity_vec.push_back(i+1);
+            fidelity_vec.push_back(i);
             fidelity_vec.push_back(fidelity_full[i] -1);
         }
     }
