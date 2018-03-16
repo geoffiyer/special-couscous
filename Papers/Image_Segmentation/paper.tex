@@ -64,8 +64,8 @@ final image with better resolution than either of the originals
 rather than seeking to merge our images, we instead perform feature extraction,
 with applications toward segmentation.
 
-In figure \ref{fig:DFCfig1} we show an example multimodal dataset from the 2015
-IEEE Data Fusion Contest \cite{7536139} (abbreviated as DFC), which consists of
+In figure \ref{fig:DFC2015fig1} we show an example multimodal dataset from the 2015
+IEEE Data Fusion Challenge \cite{7536139} (abbreviated as DFC2015), which consists of
 an optical and a lidar (elevation) image of a residential neighborhood in
 Belgium. This particular dataset is interesting because of the large amount of
 non-redundancy between the two images. By using the lidar data, one can easily
@@ -79,15 +79,15 @@ will revisit this dataset in section \ref{sec:experiment} to show that this is
 indeed the case.
 
 \begin{figure*}[!t]
-  \centering \subfloat[DFC optical
+  \centering \subfloat[DFC2015 optical
   data]{\includegraphics[width=2.5in]{./Images/DFC2015/optical.png}%
-    \label{fig:DFCoptical}}%
+    \label{fig:DFC2015optical}}%
   \hfil %
-  \subfloat[DFC lidar
+  \subfloat[DFC2015 lidar
   data]{\includegraphics[width=2.5in]{./Images/DFC2015/lidarColor.png}
-    \label{fig:DFClidar}} %
-  \caption{DFC Input Data}
-  \label{fig:DFCfig1}
+    \label{fig:DFC2015lidar}} %
+  \caption{DFC2015 Input Data}
+  \label{fig:DFC2015fig1}
 \end{figure*}
 
 % %%% An old paragraph. I really don't like this storyline, so cut it! %%%%%%%%
@@ -314,7 +314,7 @@ concatenated dataset $X$. The purpose of choosing this specific norm is to
 emphasize the unique information that each dataset brings. By using the maximum
 of all distances (i.e. the minimum of all similarities) two data points
 $x_i,x_j$ are considered similar only when they are similar in every
-dataset. For example, in figure \ref{fig:DFCfig1} the gray road and the gray
+dataset. For example, in figure \ref{fig:DFC2015fig1} the gray road and the gray
 rooftops are considered very similar in the RGB modality, but quite different in
 the lidar modality. Therefore, under this norm the two areas will be given a low
 similarity score, as desired.
@@ -441,7 +441,7 @@ energy function
 \begin{align}\label{eqn:GinzburgLandauEnergy}
   E(u) &= \epsilon \cdot \text{Tr}\left(u^TL_{sym} u\right) \nonumber \\
        &+ \frac{1}{\epsilon}\sum_i W(u_i) \nonumber \\
-       &+ \sum_i \frac{\mu}{2}\lambda(x_i)\norm{u_i - \hat{u}_i}^2_{L_2}.
+       &+ \sum_i \frac{\mu}{2}\chi(x_i)\norm{u_i - \hat{u}_i}^2_{L_2}.
 \end{align}
 The first term of (\ref{eqn:GinzburgLandauEnergy}) is Dirichlet Energy, similar
 to \ref{sec:SpecClust}. The second term is the multiwell potential
@@ -454,7 +454,7 @@ it has been shown in \cite{gennip2012} that they converge to the (graph)
 total-variation norm as $\epsilon \to 0$. The last term includes the fidelity,
 where $\hat{u}$ represents the semisupervised input,
 \begin{align}
-  \lambda(x_i) = \begin{cases} 1 \quad \text{if $x_i$ is part of fidelity input}\\
+  \chi(x_i) = \begin{cases} 1 \quad \text{if $x_i$ is part of fidelity input}\\
     0 \quad
     \text{else}
   \end{cases},
@@ -463,13 +463,14 @@ and $\mu$ is a tuning parameter.
 
 The gradient descent update associated to this energy is given by
 \begin{align}
-  \frac{\pd u}{\pd t} = -\epsilon L_{sym} u - \frac{1}{\ep}W^{'}(u) - \mu\lambda(x)(u-\hat{u}).
+  \frac{\pd u}{\pd t} = -\epsilon L_{sym} u - \frac{1}{\ep}W^{'}(u) - \mu\chi(x)(u-\hat{u}).
 \end{align}
 Similar to \cite{Merkurjev13,Garcia2014,Meng17}, we propose to minimize this via
 an MBO algorithm. If $u^{n}$ represents the $n$-th iterate, then to calculate
 $u^{n+1}$ we first diffuse
 \begin{align}\label{eqn:diffusion}
-  \frac{u^{n+\frac{1}{2}}-u^n}{dt} = -L_{sym} u^n - \mu \lambda(x) (u^n - \hat{u}).
+  \frac{u^{n+\frac{1}{2}}-u^n}{dt} = &-L_{sym} u^{n+\frac{1}{2}} - \mu (u^{n+\frac{1}{2}}-\hat{u}) \nonumber \\
+  & + (1 - \chi(x))(u^n - \hat{u}).
 \end{align}
 Then threshold each row
 \begin{align}\label{eqn:threshold}
@@ -479,7 +480,7 @@ This method effectively splits the energy into two parts and minimizes each
 alternatively. The diffusion step (\ref{eqn:diffusion}) handles the
 semisupervised Dirichlet Energy (terms 1 and 3 in
 (\ref{eqn:GinzburgLandauEnergy})), and the thresholding minimizes the potential
-function $W$ (term 2 in (\ref{eqn:GinzburgLandauEnergy})). The stopping
+function $W$ (term 2 in (\ref{eqn:GinzburgLandauEnergy})). Note that for the diffusion equation (\ref{eqn:diffusion}) we use an implicit method to guarantee stability, as can be more clearly seen after changing coordinates in equation (\ref{eqn:diffusionEvecCoords}). The stopping
 criterion for this algorithm is based on the difference between two consecutive
 iterates $u^n,u^{n+1}$. In section \ref{sec:experiment}, we stop the algorithm
 when $u^n$ and $u^{n+1}$ agree on 99.99\% of data points.
@@ -493,17 +494,17 @@ eigendecomposition of $L_{sym}$ (the feature vectors described in
 and change coordinates
 \begin{align}
   u^n = Xa^n \\
-  \mu \lambda(x)(u^n - \hat{u}) = Xd^n
+  \chi(x)(u^n - \hat{u}) = Xd^n
 \end{align}
 then the diffusion step reduces to solving for coefficients
-\begin{align}
-  a_k^{n+1} = (1 - dt \cdot \lambda_k)\cdot a_k^n - dt\cdot d_k^n.
+\begin{align}\label{eqn:diffusionEvecCoords}
+  a_k^{n+1} = \frac{(1+\mu dt)a_k^n - \mu dt\cdot d_k^n}{1+\mu dt + dt \lambda_k}.
 \end{align}
-where $\lambda_k$ is the $k$-th eigenvalue of $L_{sym}$, in ascending order.
+where $\lambda_k$ is the $k$-th eigenvalue of $L_{sym}$, in ascending order. Note that because we have $\lambda_k \geq 0$ for all $k$, this update step is guaranteed to be stable, regardless of the choice of parameters $\mu, dt$.
 
 In practice, only a small number of leading eigenvectors and eigenvalues need to
 be calculated in order to achieve good accuracy. Therefore, in the
-eigendecomposition \ref{eqn:GLeigendecomposition}, we choose a number of
+eigendecomposition (\ref{eqn:GLeigendecomposition}), we choose a number of
 eigenvectors to use, and truncate $X$ to a rectangular matrix. This
 significantly improves the speed of the algorithm. Furthermore, in section
 \ref{sec:Nystrom}, we discuss how to approximate the leading eigenvectors of
@@ -558,40 +559,40 @@ approximation.
 \section{Experiment}
 \label{sec:experiment}
 
-\subsection{Data Fusion Contest 2015 Images}
-\label{sec:DFCexperiment}
+\subsection{Data Fusion Challenge 2015 Images}
+\label{sec:DFC2015experiment}
 
-As a first test for the algorithm, recall the DFC data presented in figure
-\ref{fig:DFCfig1}. This set consists of remote sensing images in both the
+As a first test for the algorithm, recall the DFC2015 data presented in figure
+\ref{fig:DFC2015fig1}. This set consists of remote sensing images in both the
 optical and lidar modalities, and is interesting because of the unique
 information brought by each source.
 
 \begin{figure*}[!t]
   \centering \subfloat[Example eigenvector
   1]{\includegraphics[width=2.5in]{./Images/DFC2015/evec01.png}
-    \label{fig:DFCevec1}}%
+    \label{fig:DFC2015evec1}}%
   \hfil%
   \subfloat[Example eigenvector 2]
   {\includegraphics[width=2.5in]{./Images/DFC2015/evec02.png}
-    \label{fig:DFCevec2}}%
+    \label{fig:DFC2015evec2}}%
   \hfil%
   \subfloat[Semisupervised Input]
   {\includegraphics[width=2.5in]{./Images/DFC2015/fidelity.png}
-    \label{fig:DFCfidelity}}%
+    \label{fig:DFC2015fidelity}}%
   \hfil%
   \subfloat[MBO
   segmentation]{\includegraphics[width=2.5in]{./Images/DFC2015/MBO.png}
-    \label{fig:DFCMBO}} %
+    \label{fig:DFC2015MBO}} %
   \hfil%
   \subfloat[Spectral clustering
   segmentation]{\includegraphics[width=2.5in]{./Images/DFC2015/specClust.png}
-    \label{fig:DFCspecClust}}%
+    \label{fig:DFC2015specClust}}%
   \hfil %
   \subfloat[Direct $k$-means]
   {\includegraphics[width=2.5in]{./Images/DFC2015/kmeans.png}
-    \label{fig:DFCkmeans}}%
-  \caption{DFC features and segmentations}
-  \label{fig:DFCfig2}
+    \label{fig:DFC2015kmeans}}%
+  \caption{DFC2015 features and segmentations}
+  \label{fig:DFC2015fig2}
 \end{figure*}
 
 % %%%%%%%%%%%%% May
@@ -606,10 +607,10 @@ information brought by each source.
 % \label{fig:DFCkmeans}} %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In figures \ref{fig:DFCevec1}, \ref{fig:DFCevec2}, we show two example
+In figures \ref{fig:DFC2015evec1}, \ref{fig:DFC2015evec2}, we show two example
 eigenvectors of the graph Laplacian. As explained in \ref{sec:SpecClust}, these
 vector can be thought of as feature of the dataset, and looking at them will
-give us a rough idea of the final segmentation. Notice how in \ref{fig:DFCevec1}
+give us a rough idea of the final segmentation. Notice how in \ref{fig:DFC2015evec1}
 the dark-gray asphalt is distinct from both the nearby grass (which is at the
 same elevation), and the roofs of the buildings (which are a similar
 color). This shows at the feature level that the algorithm is successfully using
@@ -617,26 +618,26 @@ both the optical and the lidar data when determining what pixels can be
 considered similar. Based on this example vector, the classification algorithm
 then separates those regions in the final results. One can note the similarities
 between each of the example eigenvectors and the final classifications
-\ref{fig:DFCspecClust}, \ref{fig:DFCMBO}.
+\ref{fig:DFC2015specClust}, \ref{fig:DFC2015MBO}.
 
 For this image, we choose to segment the data into 6 classes. As the data does
 not come with any ground truth attached, the number 6 was chosen based purely on
 personal opinion. The classes given in the semisupervised term (fig
-\ref{fig:DFCfidelity}) are roughly: tall buildings, mid-level buildings, asphalt
+\ref{fig:DFC2015fidelity}) are roughly: tall buildings, mid-level buildings, asphalt
 (bright), asphalt (dark), white tiles, and grass. The exact choice of fidelity
 pixels was made by either manually choosing locations, or by characteristics of
 the data (ex: the 1\% of pixels at highest elevation). Most importantly, these
 classes can all be separated using either color or lidar (or both).
 
 As should be expected, the spectral clustering method (fig
-\ref{fig:DFCspecClust}) does not select exactly the same 6 classes that we have manually
+\ref{fig:DFC2015specClust}) does not select exactly the same 6 classes that we have manually
 identified. As this algorithm is unsupervised, there is no way of encoding our
 human preference into the method. Therefore, the choice of exactly how to divide
 the different groups of pixels is made in accordance with just the graph min cut
 energy. In the end, this algorithm can still pick out the major features of the
 dataset, but the specific decisions of exactly which classes to combine and
 which to separate does not agree with our human intuition. By instead using a
-semisupervised algorithm such as graph MBO (fig \ref{fig:DFCMBO}), we can input
+semisupervised algorithm such as graph MBO (fig \ref{fig:DFC2015MBO}), we can input
 a small amount of information (in this case, 7\% of total pixels) in order to
 align the energy minimization with our human expectations. Therefore, the final
 result aligns quite well with initial expectations.
@@ -644,14 +645,14 @@ result aligns quite well with initial expectations.
 When choosing the exact parameters for the algorithm, there are several factors
 to consider. First, the diffusion step should be stable, which occurs when $dt$
 and $\mu$ are relatively small. Second, the final result should agree with the
-semisupervised input (fig \ref{fig:DFCfidelity}), which occurs when $\mu$ is
+semisupervised input (fig \ref{fig:DFC2015fidelity}), which occurs when $\mu$ is
 relatively large. Third, the runtime should not be too long, which occurs when
 $dt$ is relatively large. Balancing these different goals required multiple
 trial runs of the code. In this particular example we use parameters
 $dt = 0.1, \mu = 10^4$.
 
 For comparison, we also show the results of a more naive algorithm.  In figure
-\ref{fig:DFCkmeans} we apply $k$-means directly to the concatenated
+\ref{fig:DFC2015kmeans} we apply $k$-means directly to the concatenated
 (4-dimensional) dataset, without any preprocessing. As can be seen from the
 result, a direct application of $k$-means is not well suited towards handling
 information from disparate sources. In this particular example, the segmentation
@@ -756,12 +757,12 @@ of the different ground-level features, as the RGB information is not well-used.
 
 In fig \ref{fig:Umbrella} we show the results of the method applied to another
 optical/lidar set (found in \cite{Scharstein14}), which we will refer to as the
-umbrella data. Similar to the DFC set, the umbrella data serves as a good
+umbrella data. Similar to the DFC2015 set, the umbrella data serves as a good
 example because it cannot be easily analyzed using one modality alone. The
 umbrellas and the background walls are nearly the same shade of white, and can
 only be distinguished in the lidar data. Meanwhile, the different pieces of the
 background all lie at nearly the same depth, and can only be separated by
-color. As was the case with the DFC data, the final classifications
+color. As was the case with the DFC2015 data, the final classifications
 \ref{fig:UmbrellaSpecClust}, \ref{fig:UmbrellaMBO} can be understood by looking
 at the individual feature vectors. In figure \ref{fig:UmbrellaEvec1}, we see
 very clearly the difference the major features of the dataset: the front
@@ -769,11 +770,11 @@ umbrella, the back umbrella, and the background wall. Figures
 \ref{fig:UmbrellaEvec2}, \ref{fig:UmbrellaEvec3} show more of the small details
 of the data, separating the many different background objects.
 
-As was the case with the DFC data, we chose to segment this image into 6 classes
+As was the case with the DFC2015 data, we chose to segment this image into 6 classes
 based primarily on personal opinion. The classes represented in the
 semisupervised input are: the front umbrella, the back umbrella, the wooden
 cabinet in the corner, and various different colors of background objects (fig
-\ref{fig:UmbrellaFidelity}). Similar to the results from the DFC dataset, we can
+\ref{fig:UmbrellaFidelity}). Similar to the results from the DFC2015 dataset, we can
 find many major features in the spectral clustering result (fig
 \ref{fig:UmbrellaSpecClust}), but the exact details of the classification do not
 match our expectations. In particular, the foremost umbrella of this set is
@@ -807,6 +808,75 @@ the same class shows that the lidar information is not properly valued.
 %   \label{table:UmbrellaExperimentQuantitative}
 % \end{table}
 % %%%%%%%%%%%%% May be removed %%%%%%%%%%%%%
+
+\subsection{Data Fusion Challenge 2018 Images}
+%%%
+% Note to self: 1550nm lidar is for meteorology.
+% 1064nm is for terrain
+% 532nm is for "bathymetry" aka water
+For a more in-depth test of the algorithm, we look at the images from the Data Fusion Challenge 2018 (abbreviated DFC2018). A much more robust dataset, the DFC2018 consists of 48 bands of hyperspectral data covering wavelengths 380-1050nm, Multispectral-LiDAR data at 3 different wavelengths (1550nm, 1064nm, and 532nm), intensity rasters for each LiDAR band, a Digital Surface Model (DSM) of the area, and finally, ground truth data for roughly 30\% of input pixels. With this great wealth of data, we are able to see the results of our algorithm when used to coordinate a large number of modalities.
+
+\begin{figure*}[!t]
+  \centering \subfloat[Hyperspectral data (RGB bands)]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/Hyperspectral_RGB_Bands.png}
+    \label{fig:DFC2018RGB}} %
+  \hfil%
+  % \subfloat[1550nm lidar data]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/lidar1.png}
+  %   \label{fig:DFC2018Lidar1}}%
+  % \hfil%
+  \subfloat[1064nm lidar data]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/lidar2.png}
+    \label{fig:DFC2018Lidar2}}%
+  \hfil%
+  % \subfloat[532nm lidar data]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/lidar3.png}
+  %   \label{fig:DFC2018Lidar3}}%
+  % \hfil%
+  % \subfloat[1550nm intensity raster]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/lidar5.png}
+  %   \label{fig:DFC2018Lidar5}}%
+  % \hfil%
+  \subfloat[1064nm intensity raster]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/lidar6.png}
+    \label{fig:DFC2018Lidar6}}%
+  \hfil%
+  % \subfloat[532nm intensity raster]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/lidar7.png}
+  %   \label{fig:DFC2018Lidar7}}%
+  % \hfil%
+  \subfloat[Digital Surface Model]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/lidar4.png}
+    \label{fig:DFC2018Lidar4}}%
+  \hfil%
+  % \subfloat[Example eigenvector 1]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/evec01.png}%
+  %   \label{fig:DFC2018Evec1}}
+  % \hfil%%%%%%%%%%%%%%%%%%%
+  % \subfloat[Example eigenvector 2]
+  % {\includegraphics[width=1.75in]{./Images/DFC2018/evec03.png}%
+  %   \label{fig:DFC2018Evec2}}
+  % \hfil%
+  \subfloat[Semisupervised Input]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/Ground_Truth.png}%
+    \label{fig:DFC2018GT}}
+  \hfil%
+  \subfloat[MBO segmentation]
+  {\includegraphics[width=1.75in]{./Images/DFC2018/MBO_Classification.png}%
+    \label{fig:DFC2018MBO}}
+  \caption{DFC2018 Data}
+  \label{fig:DFC2018}
+\end{figure*}
+
+This dataset is more difficult to work with than the ones previously seen for several reasons, the first of which is the raw size of the data. The full hyperspectral image consists of more than 1,400,000 pixels, which is 10 times the size of DFC2015 set seen in \ref{sec:DFC2015experiment}. In addition, the LiDAR images are taken at a $2\times$ higher resolution, resulting in roughly 6,000,000 pixels for each image. We deal with this via heavy downsampling, both reducing the resolution of the LiDAR to the same as the hyperspectral, as well as working with smaller patches instead of the full dataset.
+
+The second task in dealing with this dataset is the large number of classes given in the ground truth. The full image identifies 20 different classes, TODO of which appear in the sample shown in figure \ref{fig:DFC2018GT}. %% TODO %%%
+There are lots of problems when trying to handle so many classes. For one, there are multiple classes which are labeled different, but very hard to differentiate using the base data. For example, this image contains roads, sidewalks, highways, and paved parking lots, all with different class labels. These classes are nearly the same in each dataset, and that's a bad thing.
+Another problem is handling the very small classes. Looking back at the MBO update equations, using the eigenvectors to change coordinates works well in theory when we use the entire evec matrix $X$, but in practice (refer to section) we use only a few eigenvectors. In other words, the change $a^n = X^Tu^n$ is legitimately losing information. To manage this, we handle  the Nyst\"{o}m step more carefully. Instead of choosing landmark points entirely at random, we instead choose a few points (at random) from each ground truth class. Therefore when we do what is more or less a projection, we can at least project onto a space containing things we're interested in. On top of this, we can also do something super simple like increase the number of eigenvectors. Basically we're going for $XX^T \approx I$.
+
+We don't even try simpler methods like $k$-means here. Are you kidding? 20 classes? No, you gotta use the supervised data.
+
+Let's talk about the figures I guess. Not sure what to say honestly. I didn't put everything in because it would take too much space. So what you see above is 3 channels of hyperspectral (RGB) and 3 channels of the various LiDAR input (each a separate image). Then we see out semisupervised input and the final result.
 
 \subsection{Jade Plant Data}
 

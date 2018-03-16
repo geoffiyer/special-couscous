@@ -4,14 +4,16 @@ addpath ../ImageTools
 %% Initial input variables stuff whoopie
 nystromSize = 100;
 nEvecs = 50;
+p = 2;
 
-%% The data
-
+% %% The data
 % numClasses = 3;
-% im = [0 0.1 0.3; 3 3 3.1; 9 8.9 8.9];
-% lidar = [0.2 0 0.1; 3 3.1 3; 9 8.9 8.7];
-% fidelity = [0 1 0; 0 2 0; 0 3 0];
+% im = [0; 2; 2.1; 2.2; 2.3; 2.2];
+% lidar = zeros(size(im));
+% fidelity = [1; 2; 2; 3; 3; 0];
 % fidelity = fidelity/255;
+% fidelityConst = 1.0e0;
+% dtConst = 1.0e0;
 
 numClasses = 6;
 A = load('../SpectralClustering/Umbrella/Data.mat');
@@ -21,6 +23,8 @@ lidar = rescaleIm(lidar);
 im = rescaleIm(im);
 fidelity = double(imread('~/Schoolwork/Chanussot/MBO_Code/data/fidelity_umbrella_6class.tiff'));
 fidelity = fidelity/255; % rescale to handle how matlab prints image to text
+fidelityConst = 1.0e1;
+dtConst = 1.0;
 
 % numClasses = 4;
 % im = zeros(150,150,3);
@@ -60,12 +64,13 @@ nystromSize = nystromSize + 1;
 
 [E, dex] = getTwoModalWeights(im,lidar,2,nystromSize,'L2');
 [V, D] = getEvecs(E, dex, nEvecs);
+V = orth(V);
 
 % [Einf, dex] = getTwoModalWeights(im,lidar,inf,nystromSize,'L2',dex);
 % [Vinf, Dinf] = getEvecs(Einf, dex, nEvecs);
 
 %% Do MBO on the V's
-[K, info] = MBO(V, D, numClasses, fidelity);
+[K, info] = MBO(V, D, numClasses, fidelity, fidelityConst, dtConst);
 
 if(false)
 % imwrite(rescaleIm(reshape(K1,[size(im,1) size(im,2)]))*64,jet, ...
@@ -79,6 +84,6 @@ if(false)
 end
 
 subplot(1,2,1)
-imshow(reshape((K+1)/(size(unique(fidelity),1)-1),[size(im,1) size(im,2)])*64,jet)
+imshow(reshape((K+1)/(numClasses),[size(im,1) size(im,2)])*64,jet)
 subplot(1,2,2)
 jetshow(fidelity)

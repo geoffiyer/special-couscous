@@ -52,8 +52,12 @@ end
 E2 = sqrt(sqdist(X2', center2'));
 scaling1 = sqrt(var(E1(:)));
 scaling2 = sqrt(var(E2(:)));
-E1 = E1 / scaling1;
-E2 = E2 / scaling2;
+if(scaling1 ~= 0)
+    E1 = E1 / scaling1;
+end
+if(scaling2 ~= 0)
+    E2 = E2 / scaling2;
+end
 % Nonlocal means part: currently not working
 % squaresize = 1;
 % E1 = nonlocal(E1, squaresize, imSize);

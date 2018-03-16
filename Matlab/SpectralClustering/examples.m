@@ -16,15 +16,15 @@ directory = '~/Schoolwork/Chanussot/Papers/Image_Segmentation/Images/DFC2015/';
 % A.im = nonlocal(A.im,3,2);
 % nclasses = 9;
 
-% Umbrella:
-A = load('Umbrella/Data.mat');
-nclasses = 6;
-
-% % DFC2015:
-% A = load('DFC/DFC2015.mat');
-% actualIm = A.im;
-% A.im = nonlocal(A.im,3,2);
+% % Umbrella:
+% A = load('Umbrella/Data.mat');
 % nclasses = 6;
+
+% DFC2015:
+A = load('DFC/DFC2015.mat');
+actualIm = A.im;
+A.im = nonlocal(A.im,3,2);
+nclasses = 6;
 
 % % Storage:
 % A = load('Storage/Data.mat');

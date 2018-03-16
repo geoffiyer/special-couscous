@@ -23,6 +23,11 @@ MBO_Code/Input
 MBO_Code/Input/*
 
 # DFC2018 Data is too big
+Matlab/DFC2018_Data/lasdata.zip
+Matlab/DFC2018_Data/lasdata
+Matlab/DFC2018_Data/lasdata/*
+Matlab/DFC2018_Data/phase2/*
+Matlab/DFC2018_Data/phase2
 Matlab/DFC2018_Data/2018_Release_Phase1.zip
 Matlab/DFC2018_Data/2018_Release_Phase1/*
 Matlab/DFC2018_Data/2018_Release_Phase1

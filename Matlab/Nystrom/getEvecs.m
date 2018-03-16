@@ -12,29 +12,37 @@ function [ V, va ] = getEvecs( E, dex, nEvecs )
 %% The actual linear algebra
 m = size(E,2);
 n = size(E,1);
-W = E(dex(1:m),:);
+W = E(dex(1:m),:);  % m x m matrix
 
-G = E * W^(-1/2);
+G = E * W^(-1/2); % m x n * m x m -> m x n
 
 d = G * (G' * ones(n,1));
 % Geoff says: I changed the below line. Original is d(find(d<0)) = 1e-5;
 d(d < 0) = 1e-15;
 d = d.^(-0.5);
-% Geoff says: The part with sd can be improved for sure. Why build a sparse
-% diagonal matrix to left-multiply when I can just multiply each row?
-sd = sparse(n, n);
+%%%%%%%%%%%%%%%%%%%
+% Old code. changes each row of G by left-multiplying by a diagonal mat
+%  I think it's smarter to just scale each row, as you can see below.
+% sd = sparse(n, n);
+% for i = 1:n
+%     sd(i,i) = d(i);
+% end;
+% G = sd * G;
+%%%%%%%%%%%%%%%%%%%
 for i = 1:n
-    sd(i,i) = d(i);
-end;
-G = sd * G;
+    G(i,:) = d(i) * G(i,:);
+end
 [U, L] = eig(G'*G);
 va = diag(L);
 [~, dex] = sort(va,'descend');
 U = U(:,dex);
 V = G * U;
-V = sd * V;
+for i = 1:n  % this loop replaces  V = sd*V
+    V(i,:) = d(i) * V(i,:);
+end
 
 V = real(V);
+% V = U;
 
 %% Figure out how many evecs to use
 % Do a 2-class threshold on the evals D, use this to pick the cutoff

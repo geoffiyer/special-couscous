@@ -22,6 +22,8 @@ extern "C" {
 #include "iio.h"
 }
 
+// #define PRINT_NYSTROM
+
 using namespace std;
 
 // this function is for writting the result
@@ -36,8 +38,8 @@ int main(int argc, char * argv[]){
     // Parameters to adjust are all here
     int dim1 = 3;          // dim of first modality
     int dim2 = 1;          // dim of second modality
-    double dt = 1.0e3;       // MBO algorithm step size
-    double mu = 1.0e-10;       // fidelity parameter
+    double dt;       // MBO algorithm step size
+    double mu;       // fidelity parameter. Set through file input
     bool twoNorm = 1;      // Norm is either 2norm or cos angle thing
                            // corresponds to true and false, resp
     bool nystrom = 0;      // True means do the nystrom. False means load from file
@@ -96,7 +98,7 @@ int main(int argc, char * argv[]){
     /////////////////////////////////////////////////////////////////
     
     double iterNum= 500;
-    int s=3;  // number of diffusions steps before each thresholding.
+    int s = 3;  // number of diffusions steps before each thresholding.
     int windowSize = 2;
 
     if(nystrom)
@@ -112,6 +114,8 @@ int main(int argc, char * argv[]){
         assert(!nmin.fail());
         nmin >> n;
         nmin >> m;
+        nmin >> mu;
+        nmin >> dt;
     }
 
     /////////////Input image///////////////
@@ -208,6 +212,8 @@ int main(int argc, char * argv[]){
     cout << "Fidelity Stats:\nwidth = " << width_f << "\nheight: " << height_f
          << "\ndim: " << d_f << "\n"
          << "Printing fidelity loaded into fidelity.txt\n";
+    cout << "Fidelity const: " << mu << "\n";
+    cout << "dt const: " << dt << "\n";
             
     for (int i=0; i<width_f*height_f*d_f; i++) {
         outImage << fidelity_full[i] << "\n";
@@ -302,29 +308,31 @@ int main(int argc, char * argv[]){
             in >> D_test[i];
         }
         cout << "evecs loaded\n";
-        
-        // // output Nystrom to nystrom_result.txt
-        // ofstream nout;
-        // cout << "printing nystrom matrix to nystrom_V.txt and nystrom_D.txt\n";
-        // nout.open("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Output/nystrom_V.txt");
-        // assert(!nout.fail());
-        // nout << setprecision(13);
-        // if(nout.fail()) {
-        //     cout << "But I couldn't open the file!!!\n";
-        //     return 0;
-        // }
-        // for(int i=0; i<N; ++i) {
-        //     for(int j=0; j<m; ++j) {
-        //         nout << V_test[i*m + j] << " ";
-        //     }
-        //     nout << "\n";
-        // }
-        // nout.close();
-        // nout.open("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Output/nystrom_D.txt");
-        // assert(!nout.fail());
-        // for(int i=0; i<m; ++i) {
-        //     nout << D_test[i] << "\n";
-        // }
+
+#ifdef PRINT_NYSTROM        
+        // output Nystrom to nystrom_result.txt
+        ofstream nout;
+        cout << "printing nystrom matrix to nystrom_V.txt and nystrom_D.txt\n";
+        nout.open("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Output/nystrom_V.txt");
+        assert(!nout.fail());
+        nout << setprecision(13);
+        if(nout.fail()) {
+            cout << "But I couldn't open the file!!!\n";
+            return 0;
+        }
+        for(int i=0; i<N; ++i) {
+            for(int j=0; j<m; ++j) {
+                nout << V_test[i*m + j] << " ";
+            }
+            nout << "\n";
+        }
+        nout.close();
+        nout.open("/home/gsiyer/Schoolwork/Chanussot/MBO_Code/Output/nystrom_D.txt");
+        assert(!nout.fail());
+        for(int i=0; i<m; ++i) {
+            nout << D_test[i] << "\n";
+        }
+#endif
 
     }
         
